@@ -76,17 +76,50 @@ java -jar target/dash-0.0.1-SNAPSHOT.jar
 ### Using Environment Variables
 
 ```bash
+# PostgreSQL
 export POSTGRES_HOST=localhost
 export POSTGRES_PORT=5432
 export POSTGRES_DB=dash
 export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=postgres
 
+# MongoDB
 export MONGODB_URI=mongodb://localhost:27017
 export MONGODB_DB=dash
+export MONGODB_USER=admin
+export MONGODB_PASSWORD=admin
+export MONGODB_AUTH_DB=admin
 
+# Redis
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
+export REDIS_PASSWORD=
+
+# Elasticsearch
+export ELASTICSEARCH_HOST=http://localhost:9200
+export ELASTICSEARCH_USERNAME=elastic
+export ELASTICSEARCH_PASSWORD=password
+
+# JWT
+export JWT_SECRET=dash-secret-key-change-in-production-at-least-256-bits-long
+export JWT_EXPIRATION=86400000
+export JWT_REFRESH_EXPIRATION=604800000
+
+# File Upload
+export MAX_FILE_SIZE=50MB
+export MAX_REQUEST_SIZE=50MB
+export FILE_UPLOAD_DIR=~/.dash/uploads
+
+# Mail
+export EMAIL_HOST=smtp.gmail.com
+export EMAIL_PORT=587
+export EMAIL_USERNAME=
+export EMAIL_PASSWORD=
+export DEFAULT_FROM_EMAIL=""
+
+# Server
+export SERVER_PORT=8080
+export APP_BASE_URL=http://localhost:8080
 
 mvn spring-boot:run
 ```
@@ -98,40 +131,9 @@ Once the application is running, access Swagger UI at:
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
 - **OpenAPI JSON**: http://localhost:8080/v3/api-docs
 
-## Project Structure
-
-```
-src/main/java/com/example/dash/
-├── DemoApplication.java          # Main application class
-├── config/                       # Configuration classes
-│   ├── DataSourceConfig.java     # PostgreSQL configuration
-│   ├── MongoConfig.java          # MongoDB configuration
-│   ├── RedisConfig.java          # Redis configuration
-│   └── SwaggerConfig.java        # Swagger/OpenAPI configuration
-├── controller/                   # REST controllers
-│   └── UserController.java       # Sample user controller
-├── dto/                          # Data Transfer Objects
-│   └── UserDTO.java              # User DTO with validation
-├── entity/                       # JPA entities (PostgreSQL)
-│   └── UserEntity.java           # User entity
-├── document/                     # MongoDB documents
-│   └── UserDocument.java         # User document
-├── repository/                   # Repository interfaces
-│   ├── UserRepository.java       # PostgreSQL repository
-│   └── mongo/                    # MongoDB repositories
-│       └── UserMongoRepository.java
-└── service/                      # Service layer
-    ├── UserService.java          # Business logic
-    └── CacheService.java         # Redis cache operations
-
-src/main/resources/
-├── application.yml               # Main configuration
-└── application.properties        # Alternative properties file
-```
-
 ## Configuration Options
 
-All database and cache configurations support environment variables for easy deployment:
+All configurations support environment variables for easy deployment:
 
 | Service | Environment Variable | Default Value |
 |---------|---------------------|---------------|
@@ -142,8 +144,29 @@ All database and cache configurations support environment variables for easy dep
 | | POSTGRES_PASSWORD | postgres |
 | MongoDB | MONGODB_URI | mongodb://localhost:27017 |
 | | MONGODB_DB | dash |
+| | MONGODB_USER | admin |
+| | MONGODB_PASSWORD | admin |
+| | MONGODB_AUTH_DB | admin |
+| | MONGODB_REPLICA_SET | (empty) |
 | Redis | REDIS_HOST | localhost |
 | | REDIS_PORT | 6379 |
+| | REDIS_PASSWORD | (empty) |
+| Elasticsearch | ELASTICSEARCH_HOST | http://localhost:9200 |
+| | ELASTICSEARCH_USERNAME | elastic |
+| | ELASTICSEARCH_PASSWORD | password |
+| JWT | JWT_SECRET | dash-secret-key-... |
+| | JWT_EXPIRATION | 86400000 |
+| | JWT_REFRESH_EXPIRATION | 604800000 |
+| File Upload | MAX_FILE_SIZE | 50MB |
+| | MAX_REQUEST_SIZE | 50MB |
+| | FILE_UPLOAD_DIR | ~/.dash/uploads |
+| Mail | EMAIL_HOST | smtp.gmail.com |
+| | EMAIL_PORT | 587 |
+| | EMAIL_USERNAME | (empty) |
+| | EMAIL_PASSWORD | (empty) |
+| | DEFAULT_FROM_EMAIL | (empty) |
+| Server | SERVER_PORT | 8080 |
+| | APP_BASE_URL | http://localhost:8080 |
 
 ## License
 
