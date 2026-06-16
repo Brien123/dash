@@ -1,0 +1,95 @@
+spring:
+  application:
+    name: dash-app
+  
+  # PostgreSQL Configuration
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:-localhost}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-demo}
+    username: ${POSTGRES_USER:-root}
+    password: ${POSTGRES_PASSWORD:-password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:-mongodb://${MONGODB_USER:-admin}:${MONGODB_PASSWORD:-admin}@localhost:27017}
+      database: ${MONGODB_DB:-demo}
+      authentication-database: ${MONGODB_AUTH_DB:-admin}
+      replica-set: ${MONGODB_REPLICA_SET:-}
+
+  # Redis Configuration
+  redis:
+    host: ${REDIS_HOST:-localhost}
+    port: ${REDIS_PORT:-6379}
+    password: ${REDIS_PASSWORD:-}
+    database: 0
+    timeout: 10s
+
+  elasticsearch:
+    uris: ${ELASTICSEARCH_HOST:-http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:-elastic}
+    password: ${ELASTICSEARCH_PASSWORD:-password}
+    
+  # Redis Connection Pool (Redisson)
+  redisson:
+    singleServerConfig:
+      address: "redis://${REDIS_HOST:-localhost}:${REDIS_PORT:-6379}"
+      password: "${REDIS_PASSWORD:-}"
+
+  # Multipart / File Upload Configuration
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:50MB}
+      max-request-size: ${MAX_REQUEST_SIZE:50MB}
+
+  # Mail Configuration
+  mail:
+    host: ${EMAIL_HOST:smtp.gmail.com}
+    port: ${EMAIL_PORT:587}
+    username: ${EMAIL_USERNAME:}
+    password: ${EMAIL_PASSWORD:}
+    from-address: ${DEFAULT_FROM_EMAIL:Njanngi <johnsonkyle832@gmail.com>}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:dash-secret-key-change-in-production-at-least-256-bits-long}
+  expiration: ${JWT_EXPIRATION:86400000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+    enabled: true
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:-8080}
+
+# Application Base URL
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+
+# File Upload Configuration
+file:
+  upload:
+    directory: ${FILE_UPLOAD_DIR:${user.home}/.dash/uploads}
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.example.dash: DEBUG

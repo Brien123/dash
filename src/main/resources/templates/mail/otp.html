@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>dash Verification Code</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            font-size: 22px;
+            color: #2c3e50;
+            border-bottom: 2px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        .content {
+            margin-top: 20px;
+            color: #555;
+        }
+        .otp-code {
+            font-size: 36px;
+            letter-spacing: 8px;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: center;
+            margin: 30px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px dashed #27ae60;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3 class="header">Security Verification</h3>
+    <p class="content">
+        Hello, <br/><br/>
+        To keep your <strong>dash</strong> account secure, please use the following One-Time Password (OTP) to complete your verification:
+    </p>
+
+    <div class="otp-code" th:text="${otp}">123456</div>
+
+    <p class="content">
+        This code is valid for a limited time. Please do not share this code with anyone.
+        If you did not request this, you can safely ignore this email.
+    </p>
+
+    <div class="footer">
+        Best regards,<br/>
+        <strong>The dash Team</strong>
+    </div>
+</div>
+</body>
+</html>
