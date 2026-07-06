@@ -1,16 +1,17 @@
 package com.example.dash.common.file.service;
 
+import jakarta.annotation.PostConstruct;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -24,18 +25,37 @@ public class ImageQueueConsumer {
 
     private static final String QUEUE_KEY = "image:queue";
 
-    @Scheduled(fixedDelay = 1000)
-    public void processQueue() {
-        ImageTask task = (ImageTask) redisTemplate.opsForList().leftPop(QUEUE_KEY);
-        if (task != null) {
+    @PostConstruct
+    public void start() {
+        Thread consumer = new Thread(this::consumeLoop, "image-consumer");
+        consumer.setDaemon(true);
+        consumer.start();
+    }
+
+    private void consumeLoop() {
+        while (true) {
             try {
-                switch (task.getType()) {
-                    case "compress" -> processCompression(task);
-                    default -> log.warn("Unknown image task type: {}", task.getType());
+                ImageTask task = (ImageTask) redisTemplate
+                        .opsForList().leftPop(QUEUE_KEY, 5, TimeUnit.SECONDS);
+                while (task != null) {
+                    processTask(task);
+                    task = (ImageTask) redisTemplate
+                            .opsForList().leftPop(QUEUE_KEY, 0, TimeUnit.SECONDS);
                 }
             } catch (Exception e) {
-                log.error("Failed to process image task for {}", task.getStoredPath(), e);
+                log.error("Image consumer error", e);
             }
+        }
+    }
+
+    private void processTask(ImageTask task) {
+        try {
+            switch (task.getType()) {
+                case "compress" -> processCompression(task);
+                default -> log.warn("Unknown image task type: {}", task.getType());
+            }
+        } catch (Exception e) {
+            log.error("Failed to process image task for {}", task.getStoredPath(), e);
         }
     }
 

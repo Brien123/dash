@@ -2,13 +2,14 @@ package com.example.dash.search.service;
 
 import com.example.dash.product.model.Product;
 import com.example.dash.product.repository.ProductRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -22,19 +23,38 @@ public class ProductIndexQueueConsumer {
 
     private static final String QUEUE_KEY = "product:index:queue";
 
-    @Scheduled(fixedDelay = 1000)
-    public void processQueue() {
-        ProductIndexTask task = (ProductIndexTask) redisTemplate.opsForList().leftPop(QUEUE_KEY);
-        if (task != null) {
+    @PostConstruct
+    public void start() {
+        Thread consumer = new Thread(this::consumeLoop, "product-index-consumer");
+        consumer.setDaemon(true);
+        consumer.start();
+    }
+
+    private void consumeLoop() {
+        while (true) {
             try {
-                switch (task.getType()) {
-                    case "index" -> processIndex(task);
-                    case "delete" -> processDelete(task);
-                    default -> log.warn("Unknown product index task type: {}", task.getType());
+                ProductIndexTask task = (ProductIndexTask) redisTemplate
+                        .opsForList().leftPop(QUEUE_KEY, 5, TimeUnit.SECONDS);
+                while (task != null) {
+                    processTask(task);
+                    task = (ProductIndexTask) redisTemplate
+                            .opsForList().leftPop(QUEUE_KEY, 0, TimeUnit.SECONDS);
                 }
             } catch (Exception e) {
-                log.error("Failed to process product index task for {}", task.getProductId(), e);
+                log.error("Product index consumer error", e);
             }
+        }
+    }
+
+    private void processTask(ProductIndexTask task) {
+        try {
+            switch (task.getType()) {
+                case "index" -> processIndex(task);
+                case "delete" -> processDelete(task);
+                default -> log.warn("Unknown product index task type: {}", task.getType());
+            }
+        } catch (Exception e) {
+            log.error("Failed to process product index task for {}", task.getProductId(), e);
         }
     }
 
