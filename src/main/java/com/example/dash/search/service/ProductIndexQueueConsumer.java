@@ -2,6 +2,8 @@ package com.example.dash.search.service;
 
 import com.example.dash.product.model.Product;
 import com.example.dash.product.repository.ProductRepository;
+import com.example.dash.search.document.SearchLog;
+import com.example.dash.search.repository.SearchLogRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,19 +20,25 @@ public class ProductIndexQueueConsumer {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final ProductRepository productRepository;
+    private final SearchLogRepository searchLogRepository;
     private final com.example.dash.search.repository.ProductSearchRepository searchProductRepository;
     private final Map<String, ProductIndexHandler> indexHandlers;
 
     private static final String QUEUE_KEY = "product:index:queue";
+    private static final String SEARCH_LOG_QUEUE_KEY = "search:log:queue";
 
     @PostConstruct
     public void start() {
-        Thread consumer = new Thread(this::consumeLoop, "product-index-consumer");
-        consumer.setDaemon(true);
-        consumer.start();
+        Thread indexConsumer = new Thread(this::consumeIndexLoop, "product-index-consumer");
+        indexConsumer.setDaemon(true);
+        indexConsumer.start();
+
+        Thread searchLogConsumer = new Thread(this::consumeSearchLogLoop, "search-log-consumer");
+        searchLogConsumer.setDaemon(true);
+        searchLogConsumer.start();
     }
 
-    private void consumeLoop() {
+    private void consumeIndexLoop() {
         while (true) {
             try {
                 ProductIndexTask task = (ProductIndexTask) redisTemplate
@@ -42,6 +50,22 @@ public class ProductIndexQueueConsumer {
                 }
             } catch (Exception e) {
                 log.error("Product index consumer error", e);
+            }
+        }
+    }
+
+    private void consumeSearchLogLoop() {
+        while (true) {
+            try {
+                ProductSearchTask task = (ProductSearchTask) redisTemplate
+                        .opsForList().leftPop(SEARCH_LOG_QUEUE_KEY, 5, TimeUnit.SECONDS);
+                while (task != null) {
+                    processSearch(task);
+                    task = (ProductSearchTask) redisTemplate
+                            .opsForList().leftPop(SEARCH_LOG_QUEUE_KEY, 0, TimeUnit.SECONDS);
+                }
+            } catch (Exception e) {
+                log.error("Search log consumer error", e);
             }
         }
     }
@@ -64,7 +88,6 @@ public class ProductIndexQueueConsumer {
             log.warn("Product not found for indexing: {}", task.getProductId());
             return;
         }
-
         com.example.dash.search.document.Product searchProduct = mapToSearchProduct(product);
         searchProductRepository.save(searchProduct);
         log.info("Indexed product in Elasticsearch: {}", task.getProductId());
@@ -85,7 +108,15 @@ public class ProductIndexQueueConsumer {
         }
     }
 
-    private com.example.dash.search.document.Product mapToSearchProduct(Product product) {
+    private void processSearch(ProductSearchTask task){
+        SearchLog searchLog = new SearchLog();
+        searchLog.setUserId(task.getUserId());
+        searchLog.setSearchRequest(task.getSearchRequestDto());
+        searchLog.setNumberOfResults(task.getNumberOfResults());
+        searchLogRepository.save(searchLog);
+    }
+
+    public com.example.dash.search.document.Product mapToSearchProduct(Product product) {
         com.example.dash.search.document.Product searchProduct = new com.example.dash.search.document.Product();
         searchProduct.setId(product.getId());
         searchProduct.setName(product.getName());

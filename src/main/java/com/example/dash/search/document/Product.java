@@ -1,13 +1,16 @@
 package com.example.dash.search.document;
 
 import org.springframework.data.annotation.Id;
+
 import java.time.Instant;
+
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.elasticsearch.annotations.Mapping;
 
 @Getter
 @Setter
@@ -23,9 +26,9 @@ public class Product {
 
     private String description;
 
-    private String currency="XAF";
+    private String currency = "XAF";
 
-    private Double price=0.0;
+    private Double price = 0.0;
 
     private String categoryId;
 
