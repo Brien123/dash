@@ -56,7 +56,7 @@ public class ProductSearch {
         // Category Filter
         if (StringUtils.hasText(request.getCategoryId())) {
             boolQueryBuilder.filter(f -> f
-                    .term(t -> t.field("categoryId.keyword").value(request.getCategoryId()))
+                    .term(t -> t.field("categoryId").value(request.getCategoryId()))
             );
         }
 

@@ -3,6 +3,7 @@ package com.example.dash.search.service;
 import com.example.dash.product.model.Product;
 import com.example.dash.product.repository.ProductRepository;
 import com.example.dash.search.document.SearchLog;
+import com.example.dash.search.dto.SearchRequestDto;
 import com.example.dash.search.repository.SearchLogRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +35,7 @@ public class SearchController {
 
     @PostMapping("/")
     public ResponseEntity<ApiResponse<Page<ProductDto>>> search(@RequestBody SearchRequestDto searchRequestDto,
-                                                                @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable){
+                                                                @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable){
         Long userId = null;
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()
